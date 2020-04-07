@@ -326,7 +326,7 @@ def get_colormap(type, units='mm/h', colorscale='pysteps'):
     units : {'mm/h', 'mm', 'dBZ'}, optional
         Units of the input array. If type is 'prob', this specifies the unit of
         the intensity threshold.
-    colorscale : {'pysteps', 'STEPS-BE', 'BOM-RF3'}, optional
+    colorscale : {'pysteps', 'STEPS-BE', 'BOM-RF3', 'IRIS'}, optional
         Which colorscale to use. Applicable if units is 'mm/h', 'mm' or 'dBZ'.
 
     Returns
