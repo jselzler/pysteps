@@ -165,8 +165,15 @@ def plot_precip_field(R, type="intensity", map=None, geodata=None,
     if map is not None:
         try:
             ax = basemaps.plot_geography(map, geodata["projection"],
-                                    bm_extent, R.shape, lw,
-                                    drawlonlatlines, **kwargs)
+                                         bm_extent, R.shape, lw,
+                                         drawlonlatlines, **kwargs)
+            reefs = cfeature.NaturalEarthFeature('physical', 'reefs', '10m')
+            islands = cfeature.NaturalEarthFeature('physical', 'minor_islands', '10m')
+            coast = cfeature.NaturalEarthFeature('physical', 'coastline', '10m')
+
+            ax.add_feature(reefs, facecolor='None', edgecolor='black')
+            ax.add_feature(islands, edgecolor='black')
+            ax.add_feature(coast, edgecolor='black')
             regular_grid = True
         except UnsupportedSomercProjection:
             # Define default fall-back projection for Swiss data(EPSG:3035)
@@ -349,6 +356,8 @@ def get_colormap(type, units='mm/h', colorscale='pysteps'):
             cmap.set_over('darkred', 1)
         if colorscale == 'STEPS-BE':
             cmap.set_over('black', 1)
+        if colorscale == 'IRIS':
+            cmap.set_over('black', 1)
         norm = colors.BoundaryNorm(clevs, cmap.N)
 
         return cmap, norm, clevs, clevsStr
@@ -437,7 +446,32 @@ def _get_colorlist(units='mm/h', colorscale='pysteps'):
             clevs = np.arange(10, 65, 5)
         else:
             raise ValueError('Wrong units in get_colorlist: %s' % units)
-
+    elif colorscale == 'IRIS':
+        color_list = np.array([(0, 255, 255),  # 0.05
+                               (0, 209, 213),  # 0.1
+                               (0, 151, 154),  # 0.2
+                               (0, 128, 69),  # 0.5
+                               (0, 162, 53),  # 0.8
+                               (0, 202, 17),  # 1.0
+                               (0, 245, 7),  # 2.0
+                               (72, 255, 70),  # 5
+                               (255, 255, 0),  # 8
+                               (255, 220, 0),  # 10
+                               (255, 178, 0),  # 20
+                               (255, 138, 0),  # 80
+                               (255, 73, 0),  # 100
+                               (229, 0, 0),   # 200
+                               (182, 0, 106),  # 500
+                               (255, 0, 255)])  # 800
+        color_list = color_list / 255.
+        if units == 'mm/h':
+            clevs = [0.05, 0.1, 0.2, 0.5, 0.8, 1.0, 2.0, 5.0, 8.0, 10, 20, 80, 100, 200, 500, 800]
+        elif units == "mm":
+            clevs = [0.05, 0.1, 0.2, 0.5, 0.8, 1.0, 2.0, 5.0, 8.0, 10, 20, 80, 100, 200, 500, 800]
+        elif units == 'dBZ':
+            clevs = [6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51]
+        else:
+            raise ValueError('Wrong units in get_colorlist: %s' % units)
     else:
         print('Invalid colorscale', colorscale)
         raise ValueError("Invalid colorscale " + colorscale)
